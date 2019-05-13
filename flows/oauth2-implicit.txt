@@ -1,0 +1,23 @@
+@startuml
+
+actor User
+participant IdP as IDP
+participant SdP as SDP
+
+alt User Login
+    User -> SDP: Requests protected resource
+    User <- SDP: Redirects user to IDP /authorize endpoint
+    User -> IDP: Requests /authorize
+    User <- IDP: Presents user with login
+    User -> IDP: Submits login information
+end
+
+alt Receive Tokens Directly
+    User <- IDP: Redirects to SDP callback url with tokens
+    User -> SDP: Receives tokens and persists
+end
+
+User -> SDP: Requests protected resource
+User <- SDP: Returns protected resource
+
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+
+actor User
+participant IdP as IDP
+participant SdP as SDP
+database "SDP Store" as Store
+
+alt User Login
+    User -> SDP: Requests protected resource
+    User <- SDP: Redirects user to IDP /authorize endpoint
+    User -> IDP: Requests /authorize
+    User <- IDP: Presents user with login
+    User -> IDP: Submits login information
+end
+
+alt Auth Code Token Exchange
+    User <- IDP: Redirects to SDP callback url with auth "code"
+    IDP <- SDP: Calls IDP /token service to exchange auth code with token
+    IDP -> SDP: Returns tokens
+    SDP -> Store: Persists tokens
+    User <- SDP: Creates session cookie and redirects to protected resource
+end
+
+User -> SDP: Requests protected resource
+User <- SDP: Returns protected resource
+
+@enduml

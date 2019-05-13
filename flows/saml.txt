@@ -1,0 +1,42 @@
+@startuml
+
+actor User
+participant IdP
+participant SdP
+database "Sdp Store" as SdpStore
+
+alt Metadata Exchange
+    IdP <- SdP: Request IdP Metadata XML
+    SdP -> SdpStore: Store IdP Metadata
+end
+
+alt IdP Discovery
+    User -> SdP: User requests authorized resource
+    User <- SdP: Redirects user to IdP to authorize
+    note left of SdP
+        SdP includes a SAML AuthnRequest
+    end note
+    User -> IdP: User redirects to IdP page
+    note right of User
+        User reqest includes AuthnRequest in URL
+    end note
+    User <- IdP: IdP presents login page to User
+end
+
+alt User login
+    User -> IdP: User submits login information
+    IdP -> IdP: Validates login and creates a signed SAML Response
+    User <- IdP: Returns self submitting form that POST's to SdP
+    User -> SdP: User submits POST to SdP
+end
+
+alt User authorized
+    SdP -> SdpStore: Persists user session
+    note right of SdP
+        SdP is responsible for managing sessions
+    end note
+    User <- SdP: Redirects authorized user to protected resource
+    User -> SdP: User accesses protected resource
+end
+
+@enduml
